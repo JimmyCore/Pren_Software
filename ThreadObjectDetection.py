@@ -5,8 +5,8 @@ import threading
 import numpy as np
 import requests
 from pyzbar.pyzbar import decode
-from domain.PlantEntity import Plant
-from vehicle.ThreadVehicle import VehicleControlling
+from PlantEntity import Plant
+from ThreadVehicle import VehicleControlling
 
 API_KEY = '2b10glUixSPZOunMJ952kc5Pe'
 API_URL = f'https://my-api.plantnet.org/v2/identify/all?api-key={API_KEY}'
@@ -57,7 +57,8 @@ class ObjectDetection(threading.Thread):
                 img_arr = np.array(img)
 
                 # len_qr_code = calc_qr_code_len(pts)
-                center_qr_code = calc_center(pts)
+                # center_qr_code = calc_center(pts)
+                center_qr_code = (200, 200)
                 dist = center_qr_code[0] - img_arr.shape[1] / 2
 
                 cv2.putText(img, str(dist), center_qr_code, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
@@ -67,8 +68,7 @@ class ObjectDetection(threading.Thread):
                     # plant_img = cut_image(img, len_qr_code, center_qr_code)
                     # Read QR - Code
                     tempData = barcode.data.decode('utf-8')
-                    img = cut_image(img=img, qrc_center=center_qr_code, qrc_len=calc_qr_code_len)
-
+                    # img = cut_image(img=img, qrc_center=center_qr_code, qrc_len=calc_qr_code_len)
                     if (not ObjectDetection.has_numbers(tempData)) and (1 not in self.detect_positions):
                         if self.detect_plant(1, img):
                             self.detect_positions.append(1)
@@ -107,8 +107,8 @@ class ObjectDetection(threading.Thread):
 
     def detect_plant(self, position, frame):
         print(f"Probiere Pflanze an Position {position} zu erkennen.")
-        # cv2.imwrite(f'../plant_images/plant_{position}.jpg', frame)
-        img = open(f'../plant_images/plant_{position}.jpg', 'rb')
+        cv2.imwrite(f'plant_images/plant_{position}.jpg', frame)
+        img = open(f'plant_images/plant_{position}.jpg', 'rb')
         if img:
             image_path = f'plant_images/plant_{position}.jpg'
             image_data = open(image_path, 'rb')

@@ -2,7 +2,7 @@ import asyncio
 from socketio import client
 
 # !!! IMPORTANT: websocket-client has to be installed -> pip install websocket-client or see requirements.txt
-from domain.VehicleActionEnum import VehicleAction
+from VehicleActionEnum import VehicleAction
 
 endpoint_local = "http://localhost:5000"
 endpoint_productive = "https://flask-pren.herokuapp.com/"

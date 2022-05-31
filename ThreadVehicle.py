@@ -1,19 +1,19 @@
 import logging
 import threading
-from web_service import DataCommunication as dc
+import DataCommunication as dc
 from collections import namedtuple
 
-# import serial
+import serial
 
 from threading import Thread
 from time import sleep
 from typing import Any
 
 from UartWrapper import UARTWrapper
-from domain.VehicleEntity import Vehicle
-from domain.VehicleActionEnum import VehicleAction
+from VehicleEntity import Vehicle
+from VehicleActionEnum import VehicleAction
 
-logging.basicConfig(filename="../vehicleLog.log", level=logging.ERROR)
+logging.basicConfig(filename="vehicleLog.log", level=logging.ERROR)
 
 
 class VehicleControlling(Thread):
@@ -22,12 +22,10 @@ class VehicleControlling(Thread):
 
         self.UART_LOCK = threading.Lock()
         self.ACTION_LOCK = threading.Lock()
-
         self.drive_event = threading.Event()
-
         self.vehicle = vehicle
-        # self.ser = serial.Serial('/dev/ttyS1', 9600)
-        self.ser = uart_wrapper
+        self.serial = serial.Serial('/dev/ttyS1', 9600, timeout=1)
+        # self.ser = uart_wrapper
         dc.start_client_productive()
         # dc.start_client_local()
         # dc.start_timer()
@@ -46,24 +44,21 @@ class VehicleControlling(Thread):
     def drive_vehicle(self):
         # print(f"{threading.current_thread().getName()}: Try to Drive Car with {self.vehicle.get_state()}")
         # print(f"Car drive action: {self.vehicle.state}")
-        self.uart(action="write", event=self.vehicle.state)
+        self.uart(action="write", event=self.vehicle.state.value)
 
     def uart(self, action: str, event: str = "") -> Any:
         with self.UART_LOCK:
-            if not self.ser.isOpen():
-                self.ser.open()
-            if action == "read":
-                # ans = self.ser.read().decode("utf-8")
-                ans = self.ser.readRaspberry()
-                self.ser.close()
-                return ans
-            elif action == "write":
-                self.ser.writeRaspberry(event)
-                self.ser.close()
-                return
-            else:
-                self.ser.close()
-                raise ValueError(f"Action {action} is not available.")
+            with self.serial as ser:
+                print("connected to: " + ser.portstr)
+                if action == "read":
+                    ans = ser.read().decode("utf-8")
+                    # ans = self.ser.readRaspberry()
+                    return ans
+                elif action == "write":
+                    ser.write(event)
+                    return
+                else:
+                    raise ValueError(f"Action {action} is not available.")
 
     def read_tinny_uart_data(self, timout_sec=5):
         while True:
