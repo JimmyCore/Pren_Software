@@ -58,8 +58,11 @@ class ObjectDetection(threading.Thread):
 
                 # len_qr_code = calc_qr_code_len(pts)
                 # center_qr_code = calc_center(pts)
-                center_qr_code = (200, 200)
-                dist = center_qr_code[0] - img_arr.shape[1] / 2
+                try:
+                    center_qr_code = (200, 200)
+                    dist = center_qr_code[0] - img_arr.shape[1] / 2
+                except Exception as ex:
+                    dist = 0
 
                 cv2.putText(img, str(dist), center_qr_code, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                 cv2.polylines(img, [pts], True, (255, 0, 255), 5)

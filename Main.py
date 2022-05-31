@@ -1,11 +1,9 @@
 import logging
 from ThreadObjectDetection import ObjectDetection
 from ThreadVehicle import VehicleControlling
-from TinnySim import TinnyK22
 from UartWrapper import UARTWrapper
 from VehicleActionEnum import VehicleAction
 from VehicleEntity import Vehicle
-
 import RPi.GPIO as GPIO
 
 """
