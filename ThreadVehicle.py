@@ -2,13 +2,10 @@ import logging
 import threading
 import DataCommunication as dc
 from collections import namedtuple
-
 import serial
-
 from threading import Thread
 from time import sleep
 from typing import Any
-
 from UartWrapper import UARTWrapper
 from VehicleEntity import Vehicle
 from VehicleActionEnum import VehicleAction

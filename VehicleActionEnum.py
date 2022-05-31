@@ -12,4 +12,4 @@ class VehicleAction(Enum):
     SEVENTY_PERCENT = "drive 70%"
     EIGHTY_PERCENT = "drive 80%"
     NINETY_PERCENT = "drive 90%"
-    FULL_SPEED = "drive 100%"
+    FULL_SPEED = "drive start"
