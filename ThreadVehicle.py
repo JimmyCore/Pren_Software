@@ -110,5 +110,8 @@ class VehicleControlling(Thread):
         return unpacked
 
     def run(self):
+        dc.event_to_server("debug", f'Start Thread Vehicle Controlling')
         thread_driving = Thread(target=self.drive_action, name="Driving-Thread")
         thread_driving.start()
+        thread_vehicle_data = Thread(target=self.read_tinny_uart_data, name="Tinny-Data-Thread")
+        thread_vehicle_data.start()

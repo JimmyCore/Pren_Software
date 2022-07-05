@@ -46,7 +46,7 @@ class ObjectDetection(threading.Thread):
         # self.cap.set(4, frame_width)
         # self.stream = PiVideoStream(resolution=(640, 480), framerate=60, exposure_mode="sport").start()
         # sleep(1)
-        self.stream = PiVideoStream(resolution=(1024, 752), framerate=60, iso=500, exposure_mode="sport").start()
+        self.stream = PiVideoStream(resolution=(1024, 752), framerate=60, iso=500).start()
 
         self.attempts = 3
         self.plants = []
@@ -58,6 +58,8 @@ class ObjectDetection(threading.Thread):
             # success, img = self.cap.read()
             img = self.stream.read()
             img = cv2.flip(img, 0)
+            cv2.imwrite(f'Test.jpg', img)
+
             for barcode in decode(img):
                 # Add Rectangle around QR - Code
                 pts = np.array([barcode.polygon], np.int32)
@@ -270,5 +272,6 @@ class ObjectDetection(threading.Thread):
         return any(char.isdigit() for char in inputString)
 
     def run(self):
+        dc.event_to_server("debug", f'Start Thread Object Detection')
         thread_driving = threading.Thread(target=self.qr_code_scanner, name="Object Detection-Thread")
         thread_driving.start()
