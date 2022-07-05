@@ -21,12 +21,6 @@ class VehicleControlling(Thread):
         self.ACTION_LOCK = threading.Lock()
         self.drive_event = threading.Event()
         self.vehicle = vehicle
-        self.serial = serial.Serial('/dev/ttyS1', 9600, timeout=1)
-        # self.ser = uart_wrapper
-        dc.start_client_productive()
-        # dc.start_client_local()
-        # dc.start_timer()
-        dc.event_to_server("debug", "main final started")
 
     def OnDrive(self, action: VehicleAction):
         self.vehicle.drive_action(action)
@@ -39,19 +33,17 @@ class VehicleControlling(Thread):
         self.drive_action()
 
     def drive_vehicle(self):
-        # print(f"{threading.current_thread().getName()}: Try to Drive Car with {self.vehicle.get_state()}")
-        # print(f"Car drive action: {self.vehicle.state}")
         self.uart(action="write", event=self.vehicle.state.value)
 
     def uart(self, action: str, event: str = "") -> Any:
         with self.UART_LOCK:
-            with self.serial as ser:
-                print("connected to: " + ser.portstr)
+            with serial.Serial('/dev/ttyS0', 9600, timeout=1) as ser:
                 if action == "read":
-                    ans = ser.read().decode("utf-8")
-                    # ans = self.ser.readRaspberry()
-                    return ans
+                    sensor_data = ser.readline().decode("utf-8")
+                    dc.event_to_server("debug", f"Read Sensor Data from Tinny: {sensor_data}")
+                    return sensor_data
                 elif action == "write":
+                    dc.event_to_server("debug", f"Send {event} Command to Tinny")
                     ser.write(event)
                     return
                 else:
@@ -60,7 +52,7 @@ class VehicleControlling(Thread):
     def read_tinny_uart_data(self, timout_sec=5):
         while True:
             data = self.uart("read")
-            if len(data) == 0:
+            if len(data) <= 5:
                 sleep(timout_sec)
                 continue
             else:
@@ -68,37 +60,20 @@ class VehicleControlling(Thread):
                 self.send_sensor_data_to_server(unpacked)
             sleep(timout_sec)
 
-    def send_sensor_data_to_server(self, unpacked):
-        fields = list(unpacked._fields)
-        # print(f'fields is: {fields}')
-        for field in fields:
-            # print(f'attributes sending: {field, getattr(unpacked, field)}')
-            dc.update_sensor_data(field, getattr(unpacked, field))
-
     def drive_random_car(self):
         while True:
             sleep(10)
             self.OnDrive(VehicleAction.HALF_SPEED.value)
 
-    @staticmethod
-    def update_plant_website(plant):
-        common_n1 = "Common Name 1"
-        common_n2 = "Common Name 2"
-        common_n3 = "Common Name 3"
-        if len(plant.commonNames) >= 1:
-            common_n1 = plant.commonNames[0]
-        if len(plant.commonNames) >= 2:
-            common_n2 = plant.commonNames[1]
-        if len(plant.commonNames) >= 3:
-            common_n3 = plant.commonNames[2]
+    def send_sensor_data_to_server(self, unpacked):
+        fields = list(unpacked._fields)
+        for field in fields:
+            dc.event_to_server("debug", f'attributes sending: {field, getattr(unpacked, field)} to Website')
+            dc.send_data_update(field, getattr(unpacked, field))
 
-        dc.update_sensor_data('plant_data', {
-            "position": f"{plant.position}",
-            "genus": f"{plant.genus}",
-            "family": f"{plant.family}",
-            "scientificName": f"{plant.scientificName}",
-            "commonNames": [f"{common_n1}", f"{common_n2}", f"{common_n3}"]
-        })
+    @staticmethod
+    def update_similar_plant_on_webseite(same_plant_pos):
+        dc.send_data_update("match_found", same_plant_pos)
 
     @staticmethod
     def unpack_sensor_data(data: str):
@@ -137,7 +112,3 @@ class VehicleControlling(Thread):
     def run(self):
         thread_driving = Thread(target=self.drive_action, name="Driving-Thread")
         thread_driving.start()
-        thread_vehicle_data = Thread(target=self.read_tinny_uart_data, name="Tinny-Data-Thread")
-        thread_vehicle_data.start()
-        thread_vehicle_action = Thread(target=self.drive_random_car, name="Random-Drive-Thread")
-        thread_vehicle_action.start()

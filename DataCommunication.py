@@ -21,46 +21,22 @@ def connect_error(data):
 
 @sio.event
 def disconnect():
-    stop_timer()
     print("I'm disconnected!")
 
 
-@sio.event
-def status_request():
-    status_update("online")
+def start_timer():
+    sio.emit('start_timer')
 
 
-@sio.event
-def change_speed_client(data):
-    speed_changed_frontend(data)
+def stop_timer():
+    sio.emit('stop_timer')
 
 
-def speed_changed_frontend(data):
-    action = None
-    if data > 95:
-        action = VehicleAction.FULL_SPEED
-    elif data > 85:
-        action = VehicleAction.NINETY_PERCENT
-    elif data > 75:
-        action = VehicleAction.EIGHTY_PERCENT
-    elif data > 65:
-        action = VehicleAction.SEVENTY_PERCENT
-    elif data > 55:
-        action = VehicleAction.SIXTY_PERCENT
-    elif data > 45:
-        action = VehicleAction.HALF_SPEED
-    elif data > 35:
-        action = VehicleAction.FOURTY_PERCENT
-    elif data > 25:
-        action = VehicleAction.THIRTY_PERCENT
-    elif data > 15:
-        action = VehicleAction.TWENTY_PERCENT
-    elif data > 5:
-        action = VehicleAction.TEN_PERCENT
-    else:
-        action = VehicleAction.STOP
+def event_to_server(event_type, message):
+    # give event_type a meaningful string, it will be displayed on frontend
+    asyncio.run(sendEvent(event_type, message))
 
-
+# internal
 async def sendEvent(event_type, message):
     data = {
         "name": event_type,
@@ -70,17 +46,13 @@ async def sendEvent(event_type, message):
     sio.emit(event='event', data=data)
 
 
-def event_to_server(event_type, message):
-    # give event_type a meaningful string, it will be displayed on frontend
-    asyncio.run(sendEvent(event_type, message))
-
-
-def update_sensor_data(sensor_type, message):
-    # possible sensor types:
+def send_data_update(data_type, message):
+    # possible data types:
     # speed, voltage_print, coils, acceleration, voltage_motor
     # Message formats:
     # speed: float
     # voltage_print: float
+    # voltage_motor: float
     # coils:
     # [
     #   {
@@ -113,7 +85,6 @@ def update_sensor_data(sensor_type, message):
     #       "value": float,
     #   }
     # ]
-    # voltage_motor: float
     # plant_data:
     #   {
     #     "position" : string
@@ -122,11 +93,10 @@ def update_sensor_data(sensor_type, message):
     #     "scientificName" : string
     #     "commonNames" : [string]
     #   }
+    # match_found: int,
+    asyncio.run(sendUpdate(data_type, message))
 
-    asyncio.run(sendUpdate(sensor_type, message))
-    # sendUpdate(sensor_type, message)
-
-
+# internal
 async def sendUpdate(sensor_type, message):
     data = {
         "name": sensor_type,
@@ -146,14 +116,6 @@ async def sendStatus(status):
         "status": status
     }
     sio.emit('statusInfo', {"data": data})
-
-
-def start_timer():
-    sio.emit('start_timer')
-
-
-def stop_timer():
-    sio.emit('stop_timer')
 
 
 def start_client_local():

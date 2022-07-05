@@ -1,0 +1,15 @@
+ERROR:engineio.client:disconnect handler error
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.7/dist-packages/engineio/client.py", line 540, in _trigger_event
+    return self.handlers[event](*args)
+  File "/usr/local/lib/python3.7/dist-packages/socketio/client.py", line 721, in _handle_eio_disconnect
+    self._trigger_event('disconnect', namespace=n)
+  File "/usr/local/lib/python3.7/dist-packages/socketio/client.py", line 629, in _trigger_event
+    return self.handlers[namespace][event](*args)
+  File "/home/pi/Desktop/Pren_Software/DataCommunication.py", line 25, in disconnect
+    print("I'm disconnected!")
+  File "/usr/local/lib/python3.7/dist-packages/engineio/client.py", line 36, in signal_handler
+    return original_signal_handler(sig, frame)
+  File "/usr/local/lib/python3.7/dist-packages/socketio/client.py", line 26, in signal_handler
+    return original_signal_handler(sig, frame)
+KeyboardInterrupt
