@@ -58,13 +58,13 @@ class ObjectDetection(threading.Thread):
             # success, img = self.cap.read()
             img = self.stream.read()
             img = cv2.flip(img, 0)
-            cv2.imwrite(f'Test.jpg', img)
 
             for barcode in decode(img):
                 # Add Rectangle around QR - Code
                 pts = np.array([barcode.polygon], np.int32)
                 pts = pts.reshape((-1, 1, 2))
                 img_arr = np.array(img)
+                print("QR CODE")
                 try:
                     center_qr_code = calc_center(pts)
                     dist = center_qr_code[0] - img_arr.shape[1] / 2

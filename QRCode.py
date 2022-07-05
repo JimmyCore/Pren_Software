@@ -20,4 +20,5 @@ while True:
         pts = np.array([barcode.polygon], np.int32)
         pts = pts.reshape((-1, 1, 2))
         cv2.polylines(img, [pts], True, (255, 0, 255), 5)
+        cv2.imwrite("TEST.jpg", img)
         print("ERKANNT")
