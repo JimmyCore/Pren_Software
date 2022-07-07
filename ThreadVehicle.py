@@ -37,10 +37,10 @@ class VehicleControlling(Thread):
 
     def uart(self, action: str, event: str = "") -> Any:
         with self.UART_LOCK:
-            with serial.Serial('/dev/ttyS0', 9600, timeout=1) as ser:
+            with serial.Serial('/dev/ttyS0', 9600, timeout=2) as ser:
                 if action == "read":
                     sensor_data = ser.readline().decode("utf-8")
-                    dc.event_to_server("debug", f"Read Sensor Data from Tinny: {sensor_data}")
+                    # dc.event_to_server("debug", f"Read Sensor Data from Tinny: {sensor_data}")
                     return sensor_data
                 elif action == "write":
                     dc.event_to_server("debug", f"Send {event} Command to Tinny")
@@ -49,7 +49,7 @@ class VehicleControlling(Thread):
                 else:
                     raise ValueError(f"Action {action} is not available.")
 
-    def read_tinny_uart_data(self, timout_sec=5):
+    def read_tinny_uart_data(self, timout_sec=1):
         while True:
             data = self.uart("read")
             if len(data) <= 5:
@@ -68,7 +68,7 @@ class VehicleControlling(Thread):
     def send_sensor_data_to_server(self, unpacked):
         fields = list(unpacked._fields)
         for field in fields:
-            dc.event_to_server("debug", f'attributes sending: {field, getattr(unpacked, field)} to Website')
+            # dc.event_to_server("debug", f'attributes sending: {field, getattr(unpacked, field)} to Website')
             dc.send_data_update(field, getattr(unpacked, field))
 
     @staticmethod
@@ -105,7 +105,7 @@ class VehicleControlling(Thread):
 
         unpacked.coils = coils
         unpacked.acceleration = accelerations
-        unpacked.voltage_motor = float(data_lst[-1])
+        unpacked.voltage_motor = float(data_lst[-2])
 
         return unpacked
 

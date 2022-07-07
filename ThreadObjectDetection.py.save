@@ -154,6 +154,7 @@ class ObjectDetection(threading.Thread):
                 json_result = json.loads(response.text)
 
                 if response.status_code == 200:
+                    dc.event_to_server("debug", f"Pflanze erkannt: ")
                     score_1 = json_result[list(json_result.keys())[4]][0]['score']
                     scientificNameWithoutAuthor_1 = json_result[list(json_result.keys())[4]][0]['species'][
                         'scientificNameWithoutAuthor']
@@ -163,10 +164,6 @@ class ObjectDetection(threading.Thread):
                         'scientificNameWithoutAuthor']
                     scientificName_1 = json_result[list(json_result.keys())[4]][0]['species']['scientificName']
                     commonNames_1 = json_result[list(json_result.keys())[4]][0]['species']['commonNames']
-
-                    dc.event_to_server("debug", f"Pflanze erkannt: {scientificNameWithoutAuthor_1}")
-                    dc.send_data_update("plant_data", {"position": position, "genus":genus_1, "family": family_1, "scientificName": scientificNameWithoutAuthor_1, "commonNames": commonNames_1})
-
 
                     scientificNameWithoutAuthor_2 = None
                     genus_2 = None

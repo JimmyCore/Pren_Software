@@ -37,13 +37,13 @@ def main():
                 controlling.OnDrive(VehicleAction.FULL_SPEED)
                 dc.start_timer()
                 PROGRAM_STARTED = True
-                time.sleep(5)
+                time.sleep(2)
 
             elif not GPIO.input(START) and PROGRAM_STARTED:
                 print("Stop Car")
                 controlling.OnDrive(VehicleAction.STOP)
                 PROGRAM_STARTED = False
-                time.sleep(5)
+                time.sleep(2)
     except KeyboardInterrupt:
         dc.stop_timer()
     finally:
